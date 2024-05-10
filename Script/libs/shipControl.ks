@@ -13,11 +13,17 @@ declare global function stagingFunc {
 declare global function executeNode {
     parameter exNode.
     parameter startThrottle.
-    until exNode:deltav:mag<0.2 {
+    local done to false.
+    until done {
         if exNode:deltav:mag>=20 {
             lock throttle to startThrottle.
         } else {
             lock throttle to max(exNode:deltav:mag/20,0.1).
+        }.
+
+        if exNode:deltav:mag<0.2 {
+            lock throttle to 0.
+            set done to true.
         }
     }.
 }

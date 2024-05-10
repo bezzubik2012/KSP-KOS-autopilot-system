@@ -50,7 +50,8 @@ declare global function lunchAt {
 
 declare global function circulizingOrb {
     parameter targetHeight.
-    
+    parameter patchingNeeded.
+
     local speedAtAP to 0.
     local speedAtOrb to 0.
     local dV to 0.
@@ -106,6 +107,10 @@ declare global function circulizingOrb {
     print ("achived PE = "+ship:periapsis).
     print ("error at AP = " +(ship:apoapsis-targetHeight)).
     print ("error at PE = " +(ship:periapsis-targetHeight)).
+
+    if patchingNeeded {
+        patchOrbit(targetHeight,2000).
+    }.
 }.
 
 declare global function patchOrbit {
@@ -219,4 +224,40 @@ declare global function patchOrbit {
     }.
     print ("patch orbit complete").
 
+}.
+
+declare global function hohmannTransfer {
+    parameter targetOrb.
+    parameter pathcing.
+
+    print ("Initialized Hohmann transfer to orbit "+targetOrb).
+
+    local VAP to calculateSpeedAtPoint (ship:apoapsis,ship:apoapsis,ship:periapsis).
+
+    set firstMan to node(TimeSpan(ship:obt:eta:apoapsis),0,0,0).
+    add firstMan.
+    set firstMan:prograde to calculateFirstTransferHohman(VAP,200000,ship:body).
+
+    local bTime1 to burnTime(firstMan).
+
+    set secondMan to node(TimeSpan(firstMan:orbit:eta:apoapsis),0,0,0).
+    add secondMan.
+    set secondMan:prograde to calculateSecondTransferHohman(VAP,200000,ship:body).
+
+    local bTime2 to burnTime(secondMan).
+
+    lock steering to firstMan:deltav.
+
+    wait until firstMan:eta<=(bTime1/2).
+    executeNode(nextNode,1).
+   
+    remove firstMan.
+    lock steering to nextNode:deltav.
+
+    wait until nextNode:eta<=(bTime2/2).
+    executeNode(nextNode,1).
+
+    if pathcing {
+        patchOrbit(targetOrb,2000).
+    }.
 }.

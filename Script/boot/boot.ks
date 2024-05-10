@@ -13,7 +13,7 @@ set maxTilt to 15.
 
 if ship:status="prelaunch" {
     lunchAt (HeightOrb,maneuverAt,maxTilt).
-    circulizingOrb (HeightOrb).
+    circulizingOrb (HeightOrb,true).
 }.
 
 
